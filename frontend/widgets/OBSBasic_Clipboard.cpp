@@ -84,6 +84,11 @@ void OBSBasic::on_actionCopySource_triggered()
 		copyInfo.blend_mode = obs_sceneitem_get_blending_mode(item);
 		copyInfo.visible = obs_sceneitem_visible(item);
 
+		OBSDataAutoRelease showTransition = obs_sceneitem_transition_save(item, true);
+		copyInfo.show_transition = showTransition.Get();
+		OBSDataAutoRelease hideTransition = obs_sceneitem_transition_save(item, false);
+		copyInfo.hide_transition = hideTransition.Get();
+
 		clipboard.push_back(copyInfo);
 	}
 
