@@ -106,6 +106,8 @@ struct SourceCopyInfo {
 	obs_transform_info transform;
 	obs_blending_method blend_method;
 	obs_blending_type blend_mode;
+	OBSData show_transition;
+	OBSData hide_transition;
 };
 
 struct OBSProfile {

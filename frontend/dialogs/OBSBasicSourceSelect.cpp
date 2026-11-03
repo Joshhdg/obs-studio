@@ -29,6 +29,8 @@ struct AddSourceData {
 	obs_sceneitem_crop *crop = nullptr;
 	obs_blending_method *blend_method = nullptr;
 	obs_blending_type *blend_mode = nullptr;
+	obs_data_t *show_transition = nullptr;
+	obs_data_t *hide_transition = nullptr;
 
 	/* Return data */
 	obs_sceneitem_t *scene_item = nullptr;
@@ -126,6 +128,11 @@ static void AddSource(void *_data, obs_scene_t *scene)
 	if (data->blend_mode != nullptr)
 		obs_sceneitem_set_blending_mode(sceneitem, *data->blend_mode);
 
+	if (data->show_transition != nullptr)
+		obs_sceneitem_transition_load(sceneitem, data->show_transition, true);
+	if (data->hide_transition != nullptr)
+		obs_sceneitem_transition_load(sceneitem, data->hide_transition, false);
+
 	obs_sceneitem_set_visible(sceneitem, data->visible);
 
 	data->scene_item = sceneitem;
@@ -150,7 +157,8 @@ char *get_new_source_name(const char *name, const char *format)
 }
 
 static void AddExisting(OBSSource source, bool visible, bool duplicate, obs_transform_info *transform,
-			obs_sceneitem_crop *crop, obs_blending_method *blend_method, obs_blending_type *blend_mode)
+			obs_sceneitem_crop *crop, obs_blending_method *blend_method, obs_blending_type *blend_mode,
+			obs_data_t *show_transition = nullptr, obs_data_t *hide_transition = nullptr)
 {
 	OBSBasic *main = OBSBasic::Get();
 	OBSScene scene = main->GetCurrentScene();
@@ -175,6 +183,8 @@ static void AddExisting(OBSSource source, bool visible, bool duplicate, obs_tran
 	data.crop = crop;
 	data.blend_method = blend_method;
 	data.blend_mode = blend_mode;
+	data.show_transition = show_transition;
+	data.hide_transition = hide_transition;
 
 	obs_enter_graphics();
 	obs_scene_atomic_update(scene, AddSource, &data);
@@ -411,5 +421,6 @@ void OBSBasicSourceSelect::SourcePaste(SourceCopyInfo &info, bool dup)
 	if (!source)
 		return;
 
-	AddExisting(source, info.visible, dup, &info.transform, &info.crop, &info.blend_method, &info.blend_mode);
+	AddExisting(source, info.visible, dup, &info.transform, &info.crop, &info.blend_method, &info.blend_mode,
+		    info.show_transition.Get(), info.hide_transition.Get());
 }
